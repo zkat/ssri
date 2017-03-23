@@ -52,8 +52,9 @@ function parse (integrity) {
   }, new Integrity())
 }
 
-module.exports.unparse = unparse
-function unparse (obj, sep) {
+module.exports.serialize = serialize
+module.exports.unparse = serialize
+function serialize (obj, sep) {
   if (obj.algorithm && obj.digest) {
     return IntegrityMetadata.prototype.toString.call(obj)
   } else {
