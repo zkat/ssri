@@ -1,6 +1,6 @@
 {
   "name": "ssri",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Simple Subresource Integrity library -- generates, parses, and unparses integrity strings.",
   "main": "index.js",
   "files": [
