@@ -1,0 +1,54 @@
+{
+  "name": "ssri",
+  "version": "0.0.0",
+  "description": "Simple Subresource Integrity library -- generates, parses, and unparses integrity strings.",
+  "main": "index.js",
+  "files": [
+    "*.js",
+    "lib"
+  ],
+  "scripts": {
+    "prerelease": "npm t",
+    "postrelease": "npm publish && git push --follow-tags",
+    "pretest": "standard lib test *.js",
+    "release": "standard-version -s",
+    "test": "nyc --all -- tap -J test/*.js",
+    "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
+    "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'"
+  },
+  "repository": "https://github.com/zkat/ssri",
+  "keywords": [
+    "w3c",
+    "integrity",
+    "checksum",
+    "hashing",
+    "subresource integrity",
+    "html"
+  ],
+  "author": {
+    "name": "Kat Marchán",
+    "email": "kzm@sykosomatic.org",
+    "twitter": "maybekatz"
+  },
+  "license": "CC0-1.0",
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "checksum-stream": "^1.0.2"
+  },
+  "devDependencies": {
+    "nyc": "^10.0.0",
+    "standard": "^9.0.1",
+    "standard-version": "^4.0.0",
+    "tap": "^10.3.0",
+    "weallbehave": "^1.0.0",
+    "weallcontribute": "^1.0.8"
+  },
+  "config": {
+    "nyc": {
+      "exclude": [
+        "node_modules/**",
+        "test/**"
+      ]
+    }
+  }
+}
