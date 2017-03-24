@@ -74,7 +74,7 @@ class Integrity {
   concat (integrity, opts) {
     const other = typeof integrity === 'string'
     ? integrity
-    : serialize(integrity)
+    : stringify(integrity, opts)
     return parse(`${this.toString()} ${other}`, opts)
   }
 }
@@ -87,9 +87,9 @@ function parse (sri, opts) {
   } else if (sri.algorithm && sri.digest) {
     const fullSri = new Integrity()
     fullSri[sri.algorithm] = [sri]
-    return _parse(serialize(fullSri, opts), opts)
+    return _parse(stringify(fullSri, opts), opts)
   } else {
-    return _parse(serialize(sri, opts), opts)
+    return _parse(stringify(sri, opts), opts)
   }
 }
 
@@ -107,11 +107,12 @@ function _parse (integrity, opts) {
   }, new Integrity())
 }
 
-module.exports.serialize = serialize
-module.exports.unparse = serialize
-function serialize (obj, opts) {
+module.exports.stringify = stringify
+function stringify (obj, opts) {
   if (obj.algorithm && obj.digest) {
     return IntegrityMetadata.prototype.toString.call(obj, opts)
+  } else if (typeof obj === 'string') {
+    return stringify(parse(obj, opts), opts)
   } else {
     return Integrity.prototype.toString.call(obj, opts)
   }

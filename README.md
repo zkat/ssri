@@ -16,9 +16,9 @@ Integrity](https://w3c.github.io/webappsec/specs/subresourceintegrity/) hashes.
 * [API](#api)
   * Parsing & Serializing
     * [`parse`](#parse)
+    * [`stringify`](#stringify)
     * [`Integrity#concat`](#integrity-concat)
     * [`Integrity#toString`](#integrity-to-string)
-    * [`serialize`](#serialize)
   * Integrity Generation
     * [`fromData`](#from-data)
     * [`fromStream`](#from-stream)
@@ -36,8 +36,8 @@ const integrity = 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xp
 
 // Parsing and serializing
 const parsed = ssri.parse(integrity)
+ssri.stringify(parsed) // === integrity (works on non-Integrity objects)
 parsed.toString() // === integrity
-ssri.serialize(parsed) // === integrity (works on non-Integrity objects)
 
 // Async stream functions
 ssri.checkStream(fs.createReadStream('./my-file'), parsed).then(...)
@@ -101,6 +101,49 @@ browsers, or in other situations where strict adherence to the spec is needed.
 ssri.parse('sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo') // -> Integrity
 ```
 
+#### <a name="stringify"></a> `> ssri.stringify(sri, [opts]) -> String`
+
+This function is identical to [`Integrity#toString()`](#integrity-to-string),
+except it can be used on _any_ object that [`parse`](#parse) can handle -- that
+is, a string, an `IntegrityMetadata`-like, or an `Integrity`-like.
+
+The `opts.sep` option defines the string to use when joining multiple entries
+together. To be spec-compliant, this _must_ be whitespace. The default is a
+single space (`' '`).
+
+If `opts.strict` is true, the integrity string will be created using strict
+parsing rules. See [`ssri.parse`](#parse).
+
+##### Example
+
+```javascript
+// Useful for cleaning up input SRI strings:
+ssri.stringify('\n\rsha512-foo\n\t\tsha384-bar')
+// -> 'sha512-foo sha384-bar'
+
+// IntegrityMetadata-like: only a single entry.
+ssri.stringify({
+  algorithm: 'sha512',
+  digest:'9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==',
+  options: ['foo']
+})
+// ->
+// 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo'
+
+// Integrity-like: full multi-entry syntax. Similar to output of `ssri.parse`
+ssri.stringify({
+  'sha512': [
+    {
+      algorithm: 'sha512',
+      digest:'9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==',
+      options: ['foo']
+    }
+  ]
+})
+// ->
+// 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo'
+```
+
 #### <a name="integrity-concat"></a> `> Integrity#concat(otherIntegrity, [opts]) -> Integrity`
 
 Concatenates an `Integrity` object with another IntegrityLike, or a string
@@ -133,7 +176,7 @@ Returns the string representation of an `Integrity` object. All metadata entries
 will be concatenated in the string by `opts.sep`, which defaults to `' '`.
 
 If you want to serialize an object that didn't from from an `ssri` function,
-use [`ssri.serialize()`](#serialize).
+use [`ssri.stringify()`](#stringify).
 
 If `opts.strict` is true, the integrity string will be created using strict
 parsing rules. See [`ssri.parse`](#parse).
@@ -144,45 +187,6 @@ parsing rules. See [`ssri.parse`](#parse).
 const integrity = 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo'
 
 ssri.parse(integrity).toString() === integrity
-```
-
-#### <a name="serialize"></a> `> ssri.serialize(sri, [opts]) -> String`
-
-This function is identical to [`Integrity#toString()`](#integrity-to-string),
-except it can be used on _any_ object that [`parse`](#parse) can handle -- that
-is, a string, an `IntegrityMetadata`-like, or an `Integrity`-like.
-
-The `opts.sep` option defines the string to use when joining multiple entries
-together. To be spec-compliant, this _must_ be whitespace. The default is a
-single space (`' '`).
-
-If `opts.strict` is true, the integrity string will be created using strict
-parsing rules. See [`ssri.parse`](#parse).
-
-##### Example
-
-```javascript
-// IntegrityMetadata-like: only a single entry.
-ssri.serialize({
-  algorithm: 'sha512',
-  digest:'9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==',
-  options: ['foo']
-})
-// ->
-// 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo'
-
-// Integrity-like: full multi-entry syntax. Similar to output of `ssri.parse`
-ssri.serialize({
-  'sha512': [
-    {
-      algorithm: 'sha512',
-      digest:'9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==',
-      options: ['foo']
-    }
-  ]
-})
-// ->
-// 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo'
 ```
 
 #### <a name="from-data"></a> `> ssri.fromData(data, [opts]) -> Integrity`
