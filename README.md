@@ -62,6 +62,7 @@ ssri.checkData(fs.readFileSync('./my-file'), integrity) // => 'sha512'
 * Object-based integrity metadata manipulation.
 * Small footprint: no dependencies, concise implementation.
 * Full test coverage.
+* Customizable algorithm picker.
 
 ### Contributing
 
