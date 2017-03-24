@@ -3,52 +3,101 @@
 const crypto = require('crypto')
 const Transform = require('stream').Transform
 
-const SRI_REGEX = /([^-]+)-([^?]+)([?\S*]*)/
+const SPEC_ALGORITHMS = ['sha256', 'sha384', 'sha512']
+
+const BASE64_REGEX = /[a-z0-9+/]+(?:=?=?)/i
+const SRI_REGEX = /^([^-]+)-([^?]+)([?\S*]*)$/
+const STRICT_SRI_REGEX = /^([^-]+)-([A-Za-z0-9+/]+(?:=?=?))([?\x21-\x7E]*)$/
+const VCHAR_REGEX = /[\x21-\x7E]+/
 
 class IntegrityMetadata {
-  constructor (metadata) {
-    this.source = metadata
+  constructor (metadata, opts) {
+    const strict = !!(opts && opts.strict)
+    this.source = metadata.trim()
     // 3.1. Integrity metadata
     // https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description
-    const match = metadata.match(SRI_REGEX)
+    const match = this.source.match(
+      strict
+      ? STRICT_SRI_REGEX
+      : SRI_REGEX
+    )
     if (!match) { return }
+    if (strict && !SPEC_ALGORITHMS.some(a => a === match[1])) { return }
     this.algorithm = match[1]
     this.digest = match[2]
 
     const rawOpts = match[3]
     this.options = rawOpts ? rawOpts.slice(1).split('?') : []
   }
-  toString () {
-    const opts = this.options && this.options.length
+  toString (opts) {
+    if (opts && opts.strict) {
+      // Strict mode enforces the standard as close to the foot of the
+      // letter as it can.
+      if (!(
+        // The spec has very restricted productions for algorithms.
+        // https://www.w3.org/TR/CSP2/#source-list-syntax
+        SPEC_ALGORITHMS.some(x => x === this.algorithm) &&
+        // Usually, if someone insists on using a "different" base64, we
+        // leave it as-is, since there's multiple standards, and the
+        // specified is not a URL-safe variant.
+        // https://www.w3.org/TR/CSP2/#base64_value
+        this.digest.match(BASE64_REGEX) &&
+        // Option syntax is strictly visual chars.
+        // https://w3c.github.io/webappsec-subresource-integrity/#grammardef-option-expression
+        // https://tools.ietf.org/html/rfc5234#appendix-B.1
+        (this.options || []).every(opt => opt.match(VCHAR_REGEX))
+      )) {
+        return ''
+      }
+    }
+    const options = this.options && this.options.length
     ? `?${this.options.join('?')}`
     : ''
-    return `${this.algorithm}-${this.digest}${opts}`
+    return `${this.algorithm}-${this.digest}${options}`
   }
 }
 
 class Integrity {
-  toString (sep) {
-    sep = sep || ' '
+  toString (opts) {
+    opts = opts || {}
+    let sep = opts.sep || ' '
+    if (opts.strict) {
+      // Entries must be separated by whitespace, according to spec.
+      sep = sep.replace(/\S+/g, ' ')
+    }
     return Object.keys(this).map(k => {
       return this[k].map(meta => {
-        return IntegrityMetadata.prototype.toString.call(meta)
-      })
-    }).join(sep)
+        return IntegrityMetadata.prototype.toString.call(meta, opts)
+      }).filter(x => x.length).join(sep)
+    }).filter(x => x.length).join(sep)
   }
-  concat (integrity) {
+  concat (integrity, opts) {
     const other = typeof integrity === 'string'
     ? integrity
     : serialize(integrity)
-    return parse(`${this.toString()} ${other}`)
+    return parse(`${this.toString()} ${other}`, opts)
   }
 }
 
 module.exports.parse = parse
-function parse (integrity) {
+function parse (sri, opts) {
+  opts = opts || {}
+  if (typeof sri === 'string') {
+    return _parse(sri, opts)
+  } else if (sri.algorithm && sri.digest) {
+    const fullSri = new Integrity()
+    fullSri[sri.algorithm] = [sri]
+    return _parse(serialize(fullSri, opts), opts)
+  } else {
+    return _parse(serialize(sri, opts), opts)
+  }
+}
+
+function _parse (integrity, opts) {
   // 3.4.3. Parse metadata
   // https://w3c.github.io/webappsec-subresource-integrity/#parse-metadata
   return integrity.trim().split(/\s+/).reduce((acc, string) => {
-    const metadata = new IntegrityMetadata(string)
+    const metadata = new IntegrityMetadata(string, opts)
     if (metadata.algorithm && metadata.digest) {
       const algo = metadata.algorithm
       if (!acc[algo]) { acc[algo] = [] }
@@ -60,11 +109,11 @@ function parse (integrity) {
 
 module.exports.serialize = serialize
 module.exports.unparse = serialize
-function serialize (obj, sep) {
+function serialize (obj, opts) {
   if (obj.algorithm && obj.digest) {
-    return IntegrityMetadata.prototype.toString.call(obj)
+    return IntegrityMetadata.prototype.toString.call(obj, opts)
   } else {
-    return Integrity.prototype.toString.call(obj, sep)
+    return Integrity.prototype.toString.call(obj, opts)
   }
 }
 
@@ -77,7 +126,10 @@ function fromData (data, opts) {
   : ''
   return algorithms.reduce((acc, algo) => {
     const digest = crypto.createHash(algo).update(data).digest('base64')
-    const meta = new IntegrityMetadata(`${algo}-${digest}${optString}`)
+    const meta = new IntegrityMetadata(
+      `${algo}-${digest}${optString}`,
+       opts
+    )
     if (meta.algorithm && meta.digest) {
       const algo = meta.algorithm
       if (!acc[algo]) { acc[algo] = [] }
@@ -103,7 +155,10 @@ function fromStream (stream, opts) {
       resolve(algorithms.reduce((acc, algo, i) => {
         const hash = hashes[i]
         const digest = hash.digest('base64')
-        const meta = new IntegrityMetadata(`${algo}-${digest}${optString}`)
+        const meta = new IntegrityMetadata(
+          `${algo}-${digest}${optString}`,
+          opts
+        )
         if (meta.algorithm && meta.digest) {
           const algo = meta.algorithm
           if (!acc[algo]) { acc[algo] = [] }
@@ -118,13 +173,7 @@ function fromStream (stream, opts) {
 module.exports.checkData = checkData
 function checkData (data, sri, opts) {
   opts = opts || {}
-  if (typeof sri === 'string') {
-    sri = parse(sri)
-  } else if (sri.algorithm && sri.digest) {
-    const fullSri = new Integrity()
-    fullSri[sri.algorithm] = [sri]
-    sri = fullSri
-  }
+  sri = parse(sri, opts)
   const pickAlgorithm = opts.pickAlgorithm || getPrioritizedHash
   const algorithm = Object.keys(sri).reduce((acc, algo) => {
     return pickAlgorithm(acc, algo) || acc
@@ -152,13 +201,7 @@ function checkStream (stream, sri, opts) {
 module.exports.createCheckerStream = createCheckerStream
 function createCheckerStream (sri, opts) {
   opts = opts || {}
-  if (typeof sri === 'string') {
-    sri = parse(sri)
-  } else if (sri.algorithm && sri.digest) {
-    const fullSri = new Integrity()
-    fullSri[sri.algorithm] = [sri]
-    sri = fullSri
-  }
+  sri = parse(sri, opts)
   const pickAlgorithm = opts.pickAlgorithm || getPrioritizedHash
   const algorithm = Object.keys(sri).reduce((acc, algo) => {
     return pickAlgorithm(acc, algo) || acc
