@@ -232,6 +232,12 @@ function createCheckerStream (sri, opts) {
   return stream
 }
 
+// This is a Best Effort™ at a reasonable priority for hash algos
+const DEFAULT_PRIORITY = [
+  'md5', 'whirlpool', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
+]
 function getPrioritizedHash (algo1, algo2) {
-  return algo1
+  return DEFAULT_PRIORITY.indexOf(algo1.toLowerCase()) >= DEFAULT_PRIORITY.indexOf(algo2.toLowerCase())
+  ? algo1
+  : algo2
 }
