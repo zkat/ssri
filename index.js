@@ -125,12 +125,13 @@ function checkData (data, sri, opts) {
     fullSri[sri.algorithm] = [sri]
     sri = fullSri
   }
+  const pickAlgorithm = opts.pickAlgorithm || getPrioritizedHash
   const algorithm = Object.keys(sri).reduce((acc, algo) => {
-    return getPrioritizedHashFunction(acc, algo) || acc
+    return pickAlgorithm(acc, algo) || acc
   })
   const digests = sri[algorithm].map(m => m.digest)
   const digest = crypto.createHash(algorithm).update(data).digest('base64')
-  return digests.some(d => d === digest)
+  return digests.some(d => d === digest) && algorithm
 }
 
 module.exports.checkStream = checkStream
@@ -158,8 +159,9 @@ function createCheckerStream (sri, opts) {
     fullSri[sri.algorithm] = [sri]
     sri = fullSri
   }
+  const pickAlgorithm = opts.pickAlgorithm || getPrioritizedHash
   const algorithm = Object.keys(sri).reduce((acc, algo) => {
-    return getPrioritizedHashFunction(acc, algo) || acc
+    return pickAlgorithm(acc, algo) || acc
   })
   const digests = sri[algorithm].map(m => m.digest)
   const hash = crypto.createHash(algorithm)
@@ -186,6 +188,6 @@ function createCheckerStream (sri, opts) {
   return stream
 }
 
-function getPrioritizedHashFunction (algo1, algo2) {
-  // Default implementaion is empty
+function getPrioritizedHash (algo1, algo2) {
+  return algo1
 }
