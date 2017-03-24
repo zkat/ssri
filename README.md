@@ -1,7 +1,8 @@
 # ssri [![npm version](https://img.shields.io/npm/v/ssri.svg)](https://npm.im/ssri) [![license](https://img.shields.io/npm/l/ssri.svg)](https://npm.im/ssri) [![Travis](https://img.shields.io/travis/zkat/ssri.svg)](https://travis-ci.org/zkat/ssri) [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/zkat/ssri?svg=true)](https://ci.appveyor.com/project/zkat/ssri) [![Coverage Status](https://coveralls.io/repos/github/zkat/ssri/badge.svg?branch=latest)](https://coveralls.io/github/zkat/ssri?branch=latest)
 
-[`ssri`](https://github.com/zkat/ssri), short for Simple Subresource Integrity,
-is a Node.js utility for parsing, unparsing, and generating [Subresource
+[`ssri`](https://github.com/zkat/ssri), short for Standard Subresource
+Integrity, is a Node.js utility for parsing, manipulating, serializing,
+generating, and verifying [Subresource
 Integrity](https://w3c.github.io/webappsec/specs/subresourceintegrity/) hashes.
 
 ## Install
@@ -40,25 +41,27 @@ ssri.stringify(parsed) // === integrity (works on non-Integrity objects)
 parsed.toString() // === integrity
 
 // Async stream functions
-ssri.checkStream(fs.createReadStream('./my-file'), parsed).then(...)
+ssri.checkStream(fs.createReadStream('./my-file'), integrity).then(...)
 ssri.fromStream(fs.createReadStream('./my-file')).then(sri => {
-  sri.toString() === parsed.toString()
+  sri.toString() === integrity
 })
 fs.createReadStream('./my-file').pipe(ssri.createCheckerStream(sri))
 
 // Sync data functions
 ssri.fromData(fs.readFileSync('./my-file')) // === parsed
-ssri.checkData(fs.readFileSync('./my-file'), parsed) // => true
+ssri.checkData(fs.readFileSync('./my-file'), integrity) // => 'sha512'
 ```
 
 ### Features
 
-* Parses and unparses SRI strings.
-* Generates SRI strings from direct data or Streams.
-* Optional use of reserved `option-expression` syntax.
+* Parses and stringifies SRI strings.
+* Generates SRI strings from raw data or Streams.
+* Strict standard compliance.
+* `?foo` metadata option support.
 * Multiple entries for the same algorithm.
-* Object-based integrity string manipulation.
-* Optional strict parsing that follows the spec as closely as possible.
+* Object-based integrity metadata manipulation.
+* Small footprint: no dependencies, concise implementation.
+* Full test coverage.
 
 ### Contributing
 
@@ -98,7 +101,7 @@ browsers, or in other situations where strict adherence to the spec is needed.
 ##### Example
 
 ```javascript
-ssri.parse('sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo') // -> Integrity
+ssri.parse('sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo') // -> Integrity object
 ```
 
 #### <a name="stringify"></a> `> ssri.stringify(sri, [opts]) -> String`
