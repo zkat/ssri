@@ -35,6 +35,12 @@ class Integrity {
       })
     }).join(sep)
   }
+  concat (integrity) {
+    const other = typeof integrity === 'string'
+    ? integrity
+    : serialize(integrity)
+    return parse(`${this.toString()} ${other}`)
+  }
 }
 
 module.exports.parse = parse
