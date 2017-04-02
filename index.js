@@ -229,23 +229,34 @@ function createCheckerStream (sri, opts) {
   const algorithm = sri.pickAlgorithm(opts)
   const digests = sri[algorithm]
   const hash = crypto.createHash(algorithm)
+  let streamSize = 0
   const stream = new Transform({
     transform: function (chunk, enc, cb) {
+      streamSize += chunk.length
       hash.update(chunk, enc)
       cb(null, chunk, enc)
     },
     flush: function (cb) {
       const digest = hash.digest('base64')
       const match = digests.find(meta => meta.digest === digest)
-      if (match) {
+      if (typeof opts.size === 'number' && streamSize !== opts.size) {
+        const err = new Error(`stream size mismatch when checking ${sri}.\n  Wanted: ${opts.size}\n  Found: ${streamSize}`)
+        err.code = 'EBADSIZE'
+        err.found = streamSize
+        err.expected = opts.size
+        err.sri = sri
+        return cb(err)
+      } else if (match) {
+        stream.emit('size', streamSize)
         stream.emit('verified', match)
         return cb()
       } else {
-        const err = new Error(`${algorithm} integrity checksum failed`)
+        const err = new Error(`${sri} integrity checksum failed when using ${algorithm}`)
         err.code = 'EBADCHECKSUM'
         err.found = digest
         err.expected = digests
         err.algorithm = algorithm
+        err.sri = sri
         return cb(err)
       }
     }

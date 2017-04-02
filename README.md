@@ -346,6 +346,10 @@ or an error happens with `stream`, the Promise will be rejected.
 If the Promise is rejected because verification failed, the returned error will
 have `err.code` as `EBADCHECKSUM`.
 
+If `opts.size` is given, it will be matched against the stream size. An error
+with `err.code` `EBADSIZE` will be returned by a rejection if the expected size
+and actual size fail to match.
+
 If `opts.pickAlgorithm` is provided, it will be used by
 [`Integrity#pickAlgorithm`](#integrity-pick-algorithm) when deciding which of
 the available digests to match against.
@@ -384,6 +388,10 @@ against `sri`. `sri` can be any subresource integrity representation that
 
 If verification fails, the returned stream will error with an `EBADCHECKSUM`
 error code.
+
+If `opts.size` is given, it will be matched against the stream size. An error
+with `err.code` `EBADSIZE` will be emitted by the stream if the expected size
+and actual size fail to match.
 
 If `opts.pickAlgorithm` is provided, it will be passed two algorithms as
 arguments. ssri will prioritize whichever of the two algorithms is returned by

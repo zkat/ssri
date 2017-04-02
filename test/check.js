@@ -160,5 +160,14 @@ test('checkStream', t => {
       })['sha384'][0],
       'picks the "strongest" available algorithm, by default'
     )
+    return ssri.checkStream(
+      fileStream(), `sha256-${hash(TEST_DATA, 'sha256')}`, {
+        size: TEST_DATA.length - 1
+      }
+    ).then(() => {
+      throw new Error('unexpected success')
+    }, err => {
+      t.equal(err.code, 'EBADSIZE', 'size check failure rejects the promise')
+    })
   })
 })
