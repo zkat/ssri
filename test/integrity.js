@@ -63,6 +63,24 @@ test('concat()', t => {
   t.done()
 })
 
+test('pickAlgorithm()', t => {
+  const sri = ssri.parse('sha1-foo sha512-bar sha384-baz')
+  t.equal(sri.pickAlgorithm(), 'sha512', 'picked best algorithm')
+  t.equal(
+    ssri.parse('unknown-deadbeef uncertain-bada55').pickAlgorithm(),
+    'unknown',
+    'unrecognized algorithm returned if none others known'
+  )
+  t.equal(
+    sri.pickAlgorithm({
+      pickAlgorithm: (a, b) => 'sha384'
+    }),
+    'sha384',
+    'custom pickAlgorithm function accepted'
+  )
+  t.done()
+})
+
 test('semi-private', t => {
   t.equal(ssri.Integrity, undefined, 'Integrity class is module-private.')
   t.done()

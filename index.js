@@ -77,6 +77,12 @@ class Integrity {
     : stringify(integrity, opts)
     return parse(`${this.toString(opts)} ${other}`, opts)
   }
+  pickAlgorithm (opts) {
+    const pickAlgorithm = (opts && opts.pickAlgorithm) || getPrioritizedHash
+    return Object.keys(this).reduce((acc, algo) => {
+      return pickAlgorithm(acc, algo) || acc
+    })
+  }
 }
 
 module.exports.parse = parse
@@ -175,10 +181,7 @@ module.exports.checkData = checkData
 function checkData (data, sri, opts) {
   opts = opts || {}
   sri = parse(sri, opts)
-  const pickAlgorithm = opts.pickAlgorithm || getPrioritizedHash
-  const algorithm = Object.keys(sri).reduce((acc, algo) => {
-    return pickAlgorithm(acc, algo) || acc
-  })
+  const algorithm = sri.pickAlgorithm(opts)
   const digests = sri[algorithm]
   const digest = crypto.createHash(algorithm).update(data).digest('base64')
   return digests.find(meta => meta.digest === digest) || false
@@ -203,10 +206,7 @@ module.exports.createCheckerStream = createCheckerStream
 function createCheckerStream (sri, opts) {
   opts = opts || {}
   sri = parse(sri, opts)
-  const pickAlgorithm = opts.pickAlgorithm || getPrioritizedHash
-  const algorithm = Object.keys(sri).reduce((acc, algo) => {
-    return pickAlgorithm(acc, algo) || acc
-  })
+  const algorithm = sri.pickAlgorithm(opts)
   const digests = sri[algorithm]
   const hash = crypto.createHash(algorithm)
   const stream = new Transform({

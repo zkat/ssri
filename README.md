@@ -20,6 +20,7 @@ Integrity](https://w3c.github.io/webappsec/specs/subresourceintegrity/) hashes.
     * [`stringify`](#stringify)
     * [`Integrity#concat`](#integrity-concat)
     * [`Integrity#toString`](#integrity-to-string)
+    * [`Integrity#pickAlgorithm`](#integrity-pick-algorithm)
   * Integrity Generation
     * [`fromData`](#from-data)
     * [`fromStream`](#from-stream)
@@ -193,6 +194,23 @@ const integrity = 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xp
 ssri.parse(integrity).toString() === integrity
 ```
 
+#### <a name="integrity-pick-algorithm"></a> `> Integrity#pickAlgorithm([opts]) -> String`
+
+Returns the "best" algorithm from those available in the integrity object.
+
+If `opts.pickAlgorithm` is provided, it will be passed two algorithms as
+arguments. ssri will prioritize whichever of the two algorithms is returned by
+this function. Note that the function may be called multiple times, and it
+**must** return one of the two algorithms provided. By default, ssri will make
+a best-effort to pick the strongest/most reliable of the given algorithms. It
+may intentionally deprioritize algorithms with known vulnerabilities.
+
+##### Example
+
+```javascript
+ssri.parse('sha1-WEakDigEST sha512-yzd8ELD1piyANiWnmdnpCL5F52f10UfUdEkHywVZeqTt0ymgrxR63Qz0GB7TKPoeeZQmWCaz7T1').pickAlgorithm() // sha512
+```
+
 #### <a name="from-data"></a> `> ssri.fromData(data, [opts]) -> Integrity`
 
 Creates an `Integrity` object from either string or `Buffer` data, calculating
@@ -258,12 +276,9 @@ representation that [`ssri.parse`](#parse) can handle.
 If verification succeeds, `checkData` will return the name of the algorithm that
 was used for verification (a truthy value). Otherwise, it will return `false`.
 
-If `opts.pickAlgorithm` is provided, it will be passed two algorithms as
-arguments. ssri will prioritize whichever of the two algorithms is returned by
-this function. Note that the function may be called multiple times, and it
-**must** return one of the two algorithms provided. By default, ssri will make
-a best-effort to pick the strongest/most reliable of the given algorithms. It
-may intentionally deprioritize algorithms with known vulnerabilities.
+If `opts.pickAlgorithm` is provided, it will be used by
+[`Integrity#pickAlgorithm`](#integrity-pick-algorithm) when deciding which of
+the available digests to match against.
 
 ##### Example
 
@@ -274,25 +289,22 @@ ssri.checkData(data, 'sha256-l981iLWj8kurw4UbNy8Lpxqdzd7UOxS50Glhv8FwfZ0')
 ssri.checkData(data, 'sha1-BaDDigEST') // -> false
 ```
 
-#### <a name="check-stream"></a> `> ssri.checkStream(stream, sri, [opts]) -> Promise<Algorithm>`
+#### <a name="check-stream"></a> `> ssri.checkStream(stream, sri, [opts]) -> Promise<IntegrityMetadata>`
 
 Verifies the contents of `stream` against an `sri` argument. `stream` will be
 consumed in its entirety by this process. `sri` can be any subresource integrity
 representation that [`ssri.parse`](#parse) can handle.
 
-`checkStream` will return a Promise that either resolves to the string name of
-the algorithm that verification was done with, or, if the verification fails or
-an error happens with `stream`, the Promise will be rejected.
+`checkStream` will return a Promise that either resolves to the
+`IntegrityMetadata` that succeeded verification, or, if the verification fails
+or an error happens with `stream`, the Promise will be rejected.
 
 If the Promise is rejected because verification failed, the returned error will
 have `err.code` as `EBADCHECKSUM`.
 
-If `opts.pickAlgorithm` is provided, it will be passed two algorithms as
-arguments. ssri will prioritize whichever of the two algorithms is returned by
-this function. Note that the function may be called multiple times, and it
-**must** return one of the two algorithms provided. By default, ssri will make
-a best-effort to pick the strongest/most reliable of the given algorithms. It
-may intentionally deprioritize algorithms with known vulnerabilities.
+If `opts.pickAlgorithm` is provided, it will be used by
+[`Integrity#pickAlgorithm`](#integrity-pick-algorithm) when deciding which of
+the available digests to match against.
 
 ##### Example
 
