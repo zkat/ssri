@@ -29,6 +29,13 @@ class IntegrityMetadata {
     const rawOpts = match[3]
     this.options = rawOpts ? rawOpts.slice(1).split('?') : []
   }
+  hexDigest () {
+    return this.digest && (
+      Buffer.from
+      ? Buffer.from(this.digest, 'base64')
+      : new Buffer(this.digest, 'base64')
+    ).toString('hex')
+  }
   toString (opts) {
     if (opts && opts.strict) {
       // Strict mode enforces the standard as close to the foot of the

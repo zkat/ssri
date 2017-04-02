@@ -21,6 +21,7 @@ Integrity](https://w3c.github.io/webappsec/specs/subresourceintegrity/) hashes.
     * [`Integrity#concat`](#integrity-concat)
     * [`Integrity#toString`](#integrity-to-string)
     * [`Integrity#pickAlgorithm`](#integrity-pick-algorithm)
+    * [`IntegrityMetadata#hexDigest`](#integrity-metadata-hex-digest)
   * Integrity Generation
     * [`fromData`](#from-data)
     * [`fromStream`](#from-stream)
@@ -213,6 +214,17 @@ may intentionally deprioritize algorithms with known vulnerabilities.
 
 ```javascript
 ssri.parse('sha1-WEakDigEST sha512-yzd8ELD1piyANiWnmdnpCL5F52f10UfUdEkHywVZeqTt0ymgrxR63Qz0GB7TKPoeeZQmWCaz7T1').pickAlgorithm() // sha512
+```
+
+#### <a name="integrity-metadata-hex-digest"></a> `> IntegrityMetadata#hexDigest() -> String`
+
+Called on an *individual* `IntegrityMetadata` object, will convert its `digest`
+to a hex representation of the base64 data.
+
+##### Example
+
+```javascript
+ssri.parse('sha1-deadbeef', {single: true}).hexDigest() // '75e69d6de79f'
 ```
 
 #### <a name="from-data"></a> `> ssri.fromData(data, [opts]) -> Integrity`

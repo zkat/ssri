@@ -81,6 +81,17 @@ test('pickAlgorithm()', t => {
   t.done()
 })
 
+test('IntegrityMetadata.hexDigest()', t => {
+  const sri = ssri.parse('sha512-bar', {single: true})
+  t.equal(
+    sri.hexDigest(),
+    (
+      Buffer.from ? Buffer.from('bar', 'base64') : new Buffer('bar', 'base64')
+    ).toString('hex'),
+    'returned hex version of base64 digest')
+  t.done()
+})
+
 test('semi-private', t => {
   t.equal(ssri.Integrity, undefined, 'Integrity class is module-private.')
   t.done()
