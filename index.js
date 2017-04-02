@@ -11,6 +11,7 @@ const STRICT_SRI_REGEX = /^([^-]+)-([A-Za-z0-9+/]+(?:=?=?))([?\x21-\x7E]*)$/
 const VCHAR_REGEX = /^[\x21-\x7E]+$/
 
 class IntegrityMetadata {
+  get isIntegrityMetadata () { return true }
   constructor (metadata, opts) {
     const strict = !!(opts && opts.strict)
     this.source = metadata.trim()
@@ -65,6 +66,7 @@ class IntegrityMetadata {
 }
 
 class Integrity {
+  get isIntegrity () { return true }
   toString (opts) {
     opts = opts || {}
     let sep = opts.sep || ' '

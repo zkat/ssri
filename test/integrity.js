@@ -92,6 +92,16 @@ test('IntegrityMetadata.hexDigest()', t => {
   t.done()
 })
 
+test('isIntegrity and isIntegrityMetadata', t => {
+  const sri = ssri.parse('sha512-bar')
+  t.ok(sri.isIntegrity, 'full sri has !!.isIntegrity')
+  t.ok(
+    sri['sha512'][0].isIntegrityMetadata,
+    'sri hash has !!.isIntegrityMetadata'
+  )
+  t.done()
+})
+
 test('semi-private', t => {
   t.equal(ssri.Integrity, undefined, 'Integrity class is module-private.')
   t.done()
