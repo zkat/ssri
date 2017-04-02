@@ -16,6 +16,20 @@ function fileStream () {
   return fs.createReadStream(__filename)
 }
 
+test('fromHex', t => {
+  t.equal(
+    ssri.fromHex('deadbeef', 'sha1').toString(),
+    `sha1-3q2+7w==`,
+    'created an Integrity object from a given hex + sha'
+  )
+  t.equal(
+    ssri.fromHex('deadbeef', 'sha512', {options: ['a', 'b', 'c']}).toString(),
+    `sha512-3q2+7w==?a?b?c`,
+    'options added to entry'
+  )
+  t.done()
+})
+
 test('fromData', t => {
   t.equal(
     ssri.fromData(TEST_DATA).toString(),

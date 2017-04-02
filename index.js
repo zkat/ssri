@@ -31,11 +31,7 @@ class IntegrityMetadata {
     this.options = rawOpts ? rawOpts.slice(1).split('?') : []
   }
   hexDigest () {
-    return this.digest && (
-      Buffer.from
-      ? Buffer.from(this.digest, 'base64')
-      : new Buffer(this.digest, 'base64')
-    ).toString('hex')
+    return this.digest && bufFrom(this.digest, 'base64').toString('hex')
   }
   toString (opts) {
     if (opts && opts.strict) {
@@ -134,6 +130,18 @@ function stringify (obj, opts) {
   } else {
     return Integrity.prototype.toString.call(obj, opts)
   }
+}
+
+module.exports.fromHex = fromHex
+function fromHex (hexDigest, algorithm, opts) {
+  const optString = (opts && opts.options && opts.options.length)
+  ? `?${opts.options.join('?')}`
+  : ''
+  return parse(
+    `${algorithm}-${
+      bufFrom(hexDigest, 'hex').toString('base64')
+    }${optString}`, opts
+  )
 }
 
 module.exports.fromData = fromData
@@ -253,4 +261,8 @@ function getPrioritizedHash (algo1, algo2) {
   return DEFAULT_PRIORITY.indexOf(algo1.toLowerCase()) >= DEFAULT_PRIORITY.indexOf(algo2.toLowerCase())
   ? algo1
   : algo2
+}
+
+function bufFrom (data, enc) {
+  return Buffer.from ? Buffer.from(data, enc) : new Buffer(data, enc)
 }
