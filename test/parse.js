@@ -12,7 +12,7 @@ function hash (data, algorithm) {
   return crypto.createHash(algorithm).update(data).digest('base64')
 }
 
-test('parses single-entry inegrity string', t => {
+test('parses single-entry integrity string', t => {
   const sha = hash(TEST_DATA, 'sha512')
   const integrity = `sha512-${sha}`
   t.deepEqual(ssri.parse(integrity), {
@@ -23,6 +23,18 @@ test('parses single-entry inegrity string', t => {
       options: []
     }]
   }, 'single entry parsed into full Integrity instance')
+  t.done()
+})
+
+test('can parse single-entry string directly into IntegrityMetadata', t => {
+  const sha = hash(TEST_DATA, 'sha512')
+  const integrity = `sha512-${sha}`
+  t.deepEqual(ssri.parse(integrity, {single: true}), {
+    source: integrity,
+    digest: sha,
+    algorithm: 'sha512',
+    options: []
+  }, 'single entry parsed into single IntegrityMetadata instance')
   t.done()
 })
 

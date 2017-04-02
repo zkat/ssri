@@ -102,6 +102,9 @@ function parse (sri, opts) {
 function _parse (integrity, opts) {
   // 3.4.3. Parse metadata
   // https://w3c.github.io/webappsec-subresource-integrity/#parse-metadata
+  if (opts.single) {
+    return new IntegrityMetadata(integrity, opts)
+  }
   return integrity.trim().split(/\s+/).reduce((acc, string) => {
     const metadata = new IntegrityMetadata(string, opts)
     if (metadata.algorithm && metadata.digest) {

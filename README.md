@@ -92,6 +92,10 @@ will be an `Integrity` instance that has this shape:
 }
 ```
 
+If `opts.single` is truthy, a single `IntegrityMetadata` object will be
+returned. That is, a single object that looks like `{algorithm, digest,
+options}`, as opposed to a larger object with multiple of these.
+
 If `opts.strict` is truthy, the resulting object will be filtered such that
 it strictly follows the Subresource Integrity spec, throwing away any entries
 with any invalid components. This also means a restricted set of algorithms
