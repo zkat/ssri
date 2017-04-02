@@ -249,7 +249,7 @@ ssri.fromStream(fs.createReadStream('index.js'), {
 }) // succeeds
 ```
 
-#### <a name="check-data"></a> `> ssri.checkData(data, sri, [opts]) -> Algorithm|false`
+#### <a name="check-data"></a> `> ssri.checkData(data, sri, [opts]) -> IntegrityMetadata|false`
 
 Verifies `data` integrity against an `sri` argument. `data` may be either a
 `String` or a `Buffer`, and `sri` can be any subresource integrity
@@ -302,17 +302,22 @@ const integrity = ssri.fromData(fs.readFileSync('index.js'))
 ssri.checkStream(
   fs.createReadStream('index.js'),
   integrity
-) // -> Promise<'sha512'>
+)
+// ->
+// Promise<{
+//   algorithm: 'sha512',
+//   digest: 'sha512-yzd8ELD1piyANiWnmdnpCL5F52f10UfUdEkHywVZeqTt0ymgrxR63Qz0GB7TKPoeeZQmWCaz7T1'
+// }>
 
 ssri.checkStream(
   fs.createReadStream('index.js'),
   'sha256-l981iLWj8kurw4UbNy8Lpxqdzd7UOxS50Glhv8FwfZ0'
-) // -> Promise<'sha256'>
+) // -> Promise<IntegrityMetadata>
 
 ssri.checkStream(
   fs.createReadStream('index.js'),
   'sha1-BaDDigEST'
-) // -> Promise<Error<EBADCHECKSUM>>
+) // -> Promise<Error<{code: 'EBADCHECKSUM'}>>
 ```
 
 #### <a name="create-checker-stream"></a> `> createCheckerStream(sri, [opts]) -> CheckerStream`

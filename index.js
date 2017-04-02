@@ -179,9 +179,9 @@ function checkData (data, sri, opts) {
   const algorithm = Object.keys(sri).reduce((acc, algo) => {
     return pickAlgorithm(acc, algo) || acc
   })
-  const digests = sri[algorithm].map(m => m.digest)
+  const digests = sri[algorithm]
   const digest = crypto.createHash(algorithm).update(data).digest('base64')
-  return digests.some(d => d === digest) && algorithm
+  return digests.find(meta => meta.digest === digest) || false
 }
 
 module.exports.checkStream = checkStream
@@ -193,8 +193,8 @@ function checkStream (stream, sri, opts) {
     stream.pipe(checker)
     stream.on('error', reject)
     checker.on('error', reject)
-    checker.on('verified', algo => {
-      resolve(algo)
+    checker.on('verified', meta => {
+      resolve(meta)
     })
   })
 }
@@ -207,7 +207,7 @@ function createCheckerStream (sri, opts) {
   const algorithm = Object.keys(sri).reduce((acc, algo) => {
     return pickAlgorithm(acc, algo) || acc
   })
-  const digests = sri[algorithm].map(m => m.digest)
+  const digests = sri[algorithm]
   const hash = crypto.createHash(algorithm)
   const stream = new Transform({
     transform: function (chunk, enc, cb) {
@@ -216,8 +216,9 @@ function createCheckerStream (sri, opts) {
     },
     flush: function (cb) {
       const digest = hash.digest('base64')
-      if (digests.some(d => d === digest)) {
-        stream.emit('verified', algorithm)
+      const match = digests.find(meta => meta.digest === digest)
+      if (match) {
+        stream.emit('verified', match)
         return cb()
       } else {
         const err = new Error(`${algorithm} integrity checksum failed`)

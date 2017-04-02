@@ -22,35 +22,36 @@ test('checkData', t => {
     algorithm: 'sha512',
     digest: hash(TEST_DATA, 'sha512')
   })
-  t.equal(
+  const meta = sri['sha512'][0]
+  t.deepEqual(
     ssri.checkData(TEST_DATA, sri),
-    'sha512',
+    meta,
     'Buffer data successfully verified'
   )
-  t.equal(
+  t.deepEqual(
     ssri.checkData(TEST_DATA, `sha512-${hash(TEST_DATA, 'sha512')}`),
-    'sha512',
+    meta,
     'Accepts string SRI'
   )
-  t.equal(
+  t.deepEqual(
     ssri.checkData(TEST_DATA, {
       algorithm: 'sha512',
       digest: hash(TEST_DATA, 'sha512')
     }),
-    'sha512',
+    meta,
     'Accepts IntegrityMetadata-like SRI'
   )
-  t.equal(
+  t.deepEqual(
     ssri.checkData(TEST_DATA.toString('utf8'), sri),
-    'sha512',
+    meta,
     'String data successfully verified'
   )
-  t.equal(
+  t.deepEqual(
     ssri.checkData(
       TEST_DATA,
       `sha512-nope sha512-${hash(TEST_DATA, 'sha512')}`
     ),
-    'sha512',
+    meta,
     'succeeds if any of the hashes under the chosen algorithm match'
   )
   t.equal(
@@ -58,7 +59,7 @@ test('checkData', t => {
     false,
     'returns false when verification fails'
   )
-  t.equal(
+  t.deepEqual(
     ssri.checkData(TEST_DATA, [
       'sha512-nope',
       `sha1-${hash(TEST_DATA, 'sha1')}`,
@@ -68,16 +69,20 @@ test('checkData', t => {
         if (a === 'sha1' || b === 'sha1') { return 'sha1' }
       }
     }),
-    'sha1',
+    ssri.parse({
+      algorithm: 'sha1', digest: hash(TEST_DATA, 'sha1')
+    })['sha1'][0],
     'opts.pickAlgorithm can be used to customize which one is used.'
   )
-  t.equal(
+  t.deepEqual(
     ssri.checkData(TEST_DATA, [
       `sha1-${hash(TEST_DATA, 'sha1')}`,
       `sha384-${hash(TEST_DATA, 'sha384')}`,
       `sha256-${hash(TEST_DATA, 'sha256')}`
     ].join(' ')),
-    'sha384',
+    ssri.parse({
+      algorithm: 'sha384', digest: hash(TEST_DATA, 'sha384')
+    })['sha384'][0],
     'picks the "strongest" available algorithm, by default'
   )
   t.done()
@@ -88,31 +93,32 @@ test('checkStream', t => {
     algorithm: 'sha512',
     digest: hash(TEST_DATA, 'sha512')
   })
+  const meta = sri['sha512'][0]
   let streamEnded
   const stream = fileStream().on('end', () => { streamEnded = true })
-  return ssri.checkStream(stream, sri).then(algo => {
-    t.equal(algo, 'sha512', 'Stream data successfully verified')
+  return ssri.checkStream(stream, sri).then(res => {
+    t.deepEqual(res, meta, 'Stream data successfully verified')
     t.ok(streamEnded, 'source stream ended')
     return ssri.checkStream(
       fileStream(),
       `sha512-${hash(TEST_DATA, 'sha512')}`
     )
-  }).then(algo => {
-    t.equal(algo, 'sha512', 'Accepts string SRI')
+  }).then(res => {
+    t.deepEqual(res, meta, 'Accepts string SRI')
     return ssri.checkStream(fileStream(), {
       algorithm: 'sha512',
       digest: hash(TEST_DATA, 'sha512')
     })
-  }).then(algo => {
-    t.equal(algo, 'sha512', 'Accepts IntegrityMetadata-like SRI')
+  }).then(res => {
+    t.deepEqual(res, meta, 'Accepts IntegrityMetadata-like SRI')
     return ssri.checkStream(
       fileStream(),
       `sha512-nope sha512-${hash(TEST_DATA, 'sha512')}`
     )
-  }).then(algo => {
-    t.equal(
-      algo,
-      'sha512',
+  }).then(res => {
+    t.deepEqual(
+      res,
+      meta,
       'succeeds if any of the hashes under the chosen algorithm match'
     )
     return ssri.checkStream(
@@ -133,10 +139,12 @@ test('checkStream', t => {
         if (a === 'sha1' || b === 'sha1') { return 'sha1' }
       }
     })
-  }).then(algo => {
-    t.equal(
-      algo,
-      'sha1',
+  }).then(res => {
+    t.deepEqual(
+      res,
+      ssri.parse({
+        algorithm: 'sha1', digest: hash(TEST_DATA, 'sha1')
+      })['sha1'][0],
       'opts.pickAlgorithm can be used to customize which one is used.'
     )
     return ssri.checkStream(fileStream(), [
@@ -144,10 +152,12 @@ test('checkStream', t => {
       `sha384-${hash(TEST_DATA, 'sha384')}`,
       `sha256-${hash(TEST_DATA, 'sha256')}`
     ].join(' '))
-  }).then(algo => {
-    t.equal(
-      algo,
-      'sha384',
+  }).then(res => {
+    t.deepEqual(
+      res,
+      ssri.parse({
+        algorithm: 'sha384', digest: hash(TEST_DATA, 'sha384')
+      })['sha384'][0],
       'picks the "strongest" available algorithm, by default'
     )
   })
