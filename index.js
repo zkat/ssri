@@ -258,7 +258,7 @@ function integrityStream (opts) {
         stream.emit('error', err)
       } else if (opts.integrity && !match) {
         const err = new Error(`${sri} integrity checksum failed when using ${algorithm}`)
-        err.code = 'EBADCHECKSUM'
+        err.code = 'EINTEGRITY'
         err.found = newSri
         err.expected = digests
         err.algorithm = algorithm

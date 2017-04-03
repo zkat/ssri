@@ -345,7 +345,7 @@ representation that [`ssri.parse`](#parse) can handle.
 or an error happens with `stream`, the Promise will be rejected.
 
 If the Promise is rejected because verification failed, the returned error will
-have `err.code` as `EBADCHECKSUM`.
+have `err.code` as `EINTEGRITY`.
 
 If `opts.size` is given, it will be matched against the stream size. An error
 with `err.code` `EBADSIZE` will be returned by a rejection if the expected size
@@ -378,7 +378,7 @@ ssri.checkStream(
 ssri.checkStream(
   fs.createReadStream('index.js'),
   'sha1-BaDDigEST'
-) // -> Promise<Error<{code: 'EBADCHECKSUM'}>>
+) // -> Promise<Error<{code: 'EINTEGRITY'}>>
 ```
 
 #### <a name="integrity-stream"></a> `> integrityStream(sri, [opts]) -> IntegrityStream`
@@ -398,7 +398,7 @@ If `opts.integrity` is passed in, it should be an `integrity` value understood
 by [`parse`](#parse) that the stream will check the data against. If
 verification succeeds, the integrity stream will emit a `verified` event whose
 value is a single `Hash` object that is the one that succeeded verification. If
-verification fails, the stream will error with an `EBADCHECKSUM` error code.
+verification fails, the stream will error with an `EINTEGRITY` error code.
 
 If `opts.size` is given, it will be matched against the stream size. An error
 with `err.code` `EBADSIZE` will be emitted by the stream if the expected size

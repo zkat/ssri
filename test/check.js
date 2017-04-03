@@ -127,7 +127,7 @@ test('checkStream', t => {
     ).then(() => {
       throw new Error('unexpected success')
     }, err => {
-      t.equal(err.code, 'EBADCHECKSUM', 'checksum failure rejects the promise')
+      t.equal(err.code, 'EINTEGRITY', 'checksum failure rejects the promise')
     })
   }).then(() => {
     return ssri.checkStream(fileStream(), [
