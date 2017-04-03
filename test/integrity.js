@@ -81,10 +81,15 @@ test('pickAlgorithm()', t => {
   t.done()
 })
 
-test('IntegrityMetadata.hexDigest()', t => {
-  const sri = ssri.parse('sha512-bar', {single: true})
+test('hexDigest()', t => {
   t.equal(
-    sri.hexDigest(),
+    ssri.parse('sha512-foo').hexDigest(),
+    (
+      Buffer.from ? Buffer.from('foo', 'base64') : new Buffer('foo', 'base64')
+    ).toString('hex'),
+    'returned hex version of base64 digest')
+  t.equal(
+    ssri.parse('sha512-bar', {single: true}).hexDigest(),
     (
       Buffer.from ? Buffer.from('bar', 'base64') : new Buffer('bar', 'base64')
     ).toString('hex'),

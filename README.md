@@ -21,7 +21,7 @@ Integrity](https://w3c.github.io/webappsec/specs/subresourceintegrity/) hashes.
     * [`Integrity#concat`](#integrity-concat)
     * [`Integrity#toString`](#integrity-to-string)
     * [`Integrity#pickAlgorithm`](#integrity-pick-algorithm)
-    * [`IntegrityMetadata#hexDigest`](#integrity-metadata-hex-digest)
+    * [`Integrity#hexDigest`](#integrity-hex-digest)
   * Integrity Generation
     * [`fromHex`](#from-hex)
     * [`fromData`](#from-data)
@@ -217,15 +217,16 @@ may intentionally deprioritize algorithms with known vulnerabilities.
 ssri.parse('sha1-WEakDigEST sha512-yzd8ELD1piyANiWnmdnpCL5F52f10UfUdEkHywVZeqTt0ymgrxR63Qz0GB7TKPoeeZQmWCaz7T1').pickAlgorithm() // sha512
 ```
 
-#### <a name="integrity-metadata-hex-digest"></a> `> IntegrityMetadata#hexDigest() -> String`
+#### <a name="integrity-hex-digest"></a> `> Integrity#hexDigest() -> String`
 
-Called on an *individual* `IntegrityMetadata` object, will convert its `digest`
-to a hex representation of the base64 data.
+`Integrity` is assumed to be either a single-hash `Integrity` instance, or an
+`IntegrityMetadata` instance. Returns its `digest`, converted to a hex
+representation of the base64 data.
 
 ##### Example
 
 ```javascript
-ssri.parse('sha1-deadbeef', {single: true}).hexDigest() // '75e69d6de79f'
+ssri.parse('sha1-deadbeef').hexDigest() // '75e69d6de79f'
 ```
 
 #### <a name="from-hex"></a> `> ssri.fromHex(hexDigest, algorithm, [opts]) -> Integrity`

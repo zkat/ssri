@@ -82,6 +82,9 @@ class Integrity {
     : stringify(integrity, opts)
     return parse(`${this.toString(opts)} ${other}`, opts)
   }
+  hexDigest () {
+    return parse(this, {single: true}).hexDigest()
+  }
   pickAlgorithm (opts) {
     const pickAlgorithm = (opts && opts.pickAlgorithm) || getPrioritizedHash
     return Object.keys(this).reduce((acc, algo) => {
