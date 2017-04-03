@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/zkat/ssri/compare/v2.0.0...v3.0.0) (2017-04-03)
+
+
+### Bug Fixes
+
+* **hashes:** IntegrityMetadata -> Hash ([d04aa1f](https://github.com/zkat/ssri/commit/d04aa1f))
+
+
+### Features
+
+* **check:** return IntegrityMetadata on check success ([2301e74](https://github.com/zkat/ssri/commit/2301e74))
+* **fromHex:** ssri.fromHex to make it easier to generate them from hex valus ([049b89e](https://github.com/zkat/ssri/commit/049b89e))
+* **hex:** utility function for getting hex version of digest ([a9f021c](https://github.com/zkat/ssri/commit/a9f021c))
+* **hexDigest:** added hexDigest method to Integrity objects too ([85208ba](https://github.com/zkat/ssri/commit/85208ba))
+* **integrity:** add .isIntegrity and .isIntegrityMetadata ([1b29e6f](https://github.com/zkat/ssri/commit/1b29e6f))
+* **integrityStream:** new stream that can both generate and check streamed data ([fd23e1b](https://github.com/zkat/ssri/commit/fd23e1b))
+* **parse:** allow parsing straight into a single IntegrityMetadata object ([c8ddf48](https://github.com/zkat/ssri/commit/c8ddf48))
+* **pickAlgorithm:** Intergrity#pickAlgorithm() added ([b97a796](https://github.com/zkat/ssri/commit/b97a796))
+* **size:** calculate and update stream sizes ([02ed1ad](https://github.com/zkat/ssri/commit/02ed1ad))
+
+
+### BREAKING CHANGES
+
+* **hashes:** `.isIntegrityMetadata` is now `.isHash`. Also, any references to `IntegrityMetadata` now refer to `Hash`.
+* **integrityStream:** createCheckerStream has been removed and replaced with a general-purpose integrityStream.
+
+To convert existing createCheckerStream code, move the `sri` argument into `opts.integrity` in integrityStream. All other options should be the same.
+* **check:** `checkData`, `checkStream`, and `createCheckerStream` now yield a whole IntegrityMetadata instance representing the first successful hash match.
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/zkat/ssri/compare/v1.0.0...v2.0.0) (2017-03-24)
 
