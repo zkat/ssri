@@ -169,31 +169,16 @@ function fromData (data, opts) {
 module.exports.fromStream = fromStream
 function fromStream (stream, opts) {
   opts = opts || {}
-  const algorithms = opts.algorithms || ['sha512']
-  const optString = opts.options && opts.options.length
-  ? `?${opts.options.join('?')}`
-  : ''
-  const P = opts.promise || Promise
+  const P = opts.Promise || Promise
+  const istream = integrityStream(opts)
   return new P((resolve, reject) => {
-    const hashes = algorithms.map(algo => crypto.createHash(algo))
-    stream.on('data', d => hashes.forEach(hash => hash.update(d)))
+    stream.pipe(istream)
     stream.on('error', reject)
-    stream.on('end', () => {
-      resolve(algorithms.reduce((acc, algo, i) => {
-        const hash = hashes[i]
-        const digest = hash.digest('base64')
-        const meta = new IntegrityMetadata(
-          `${algo}-${digest}${optString}`,
-          opts
-        )
-        if (meta.algorithm && meta.digest) {
-          const algo = meta.algorithm
-          if (!acc[algo]) { acc[algo] = [] }
-          acc[algo].push(meta)
-        }
-        return acc
-      }, new Integrity()))
-    })
+    istream.on('error', reject)
+    let sri
+    istream.on('integrity', s => { sri = s })
+    istream.on('end', () => resolve(sri))
+    istream.on('data', () => {})
   })
 }
 
@@ -211,54 +196,77 @@ module.exports.checkStream = checkStream
 function checkStream (stream, sri, opts) {
   opts = opts || {}
   const P = opts.Promise || Promise
-  const checker = createCheckerStream(sri, opts)
+  const checker = integrityStream({
+    integrity: sri,
+    size: opts.size,
+    strict: opts.strict,
+    pickAlgorithm: opts.pickAlgorithm
+  })
   return new P((resolve, reject) => {
     stream.pipe(checker)
     stream.on('error', reject)
     checker.on('error', reject)
-    checker.on('verified', meta => {
-      resolve(meta)
-    })
+    let sri
+    checker.on('verified', s => { sri = s })
+    checker.on('end', () => resolve(sri))
+    checker.on('data', () => {})
   })
 }
 
-module.exports.createCheckerStream = createCheckerStream
-function createCheckerStream (sri, opts) {
+module.exports.integrityStream = integrityStream
+function integrityStream (opts) {
   opts = opts || {}
-  sri = parse(sri, opts)
-  const algorithm = sri.pickAlgorithm(opts)
-  const digests = sri[algorithm]
-  const hash = crypto.createHash(algorithm)
+  // For verification
+  const sri = opts.integrity && parse(opts.integrity, opts)
+  const algorithm = sri && sri.pickAlgorithm(opts)
+  const digests = sri && sri[algorithm]
+  // Calculating stream
+  const algorithms = opts.algorithms || [algorithm || 'sha512']
+  const hashes = algorithms.map(crypto.createHash)
   let streamSize = 0
   const stream = new Transform({
-    transform: function (chunk, enc, cb) {
+    transform (chunk, enc, cb) {
       streamSize += chunk.length
-      hash.update(chunk, enc)
+      hashes.forEach(h => h.update(chunk, enc))
       cb(null, chunk, enc)
     },
-    flush: function (cb) {
-      const digest = hash.digest('base64')
-      const match = digests.find(meta => meta.digest === digest)
+    flush (done) {
+      const optString = (opts.options && opts.options.length)
+      ? `?${opts.options.join('?')}`
+      : ''
+      const newSri = parse(hashes.map((h, i) => {
+        return `${algorithms[i]}-${h.digest('base64')}${optString}`
+      }).join(' '), opts)
+      const match = (
+        // Integrity verification mode
+        opts.integrity &&
+        digests.find(meta => {
+          return newSri[algorithm].find(newmeta => {
+            return meta.digest === newmeta.digest
+          })
+        })
+      )
       if (typeof opts.size === 'number' && streamSize !== opts.size) {
         const err = new Error(`stream size mismatch when checking ${sri}.\n  Wanted: ${opts.size}\n  Found: ${streamSize}`)
         err.code = 'EBADSIZE'
         err.found = streamSize
         err.expected = opts.size
         err.sri = sri
-        return cb(err)
-      } else if (match) {
-        stream.emit('size', streamSize)
-        stream.emit('verified', match)
-        return cb()
-      } else {
+        stream.emit('error', err)
+      } else if (opts.integrity && !match) {
         const err = new Error(`${sri} integrity checksum failed when using ${algorithm}`)
         err.code = 'EBADCHECKSUM'
-        err.found = digest
+        err.found = newSri
         err.expected = digests
         err.algorithm = algorithm
         err.sri = sri
-        return cb(err)
+        stream.emit('error', err)
+      } else {
+        stream.emit('size', streamSize)
+        stream.emit('integrity', newSri)
+        match && stream.emit('verified', match)
       }
+      done()
     }
   })
   return stream

@@ -380,14 +380,26 @@ ssri.checkStream(
 ) // -> Promise<Error<{code: 'EBADCHECKSUM'}>>
 ```
 
-#### <a name="create-checker-stream"></a> `> createCheckerStream(sri, [opts]) -> CheckerStream`
+#### <a name="integrity-stream"></a> `> integrityStream(sri, [opts]) -> IntegrityStream`
 
-Returns a `Through` stream that data can be piped through in order to check it
-against `sri`. `sri` can be any subresource integrity representation that
-[`ssri.parse`](#parse) can handle.
+Returns a `Transform` stream that data can be piped through in order to generate
+and optionally check data integrity for piped data. When the stream completes
+successfully, it emits `size` and `integrity` events, containing the total
+number of bytes processed and a calculated `Integrity` instance based on stream
+data, respectively.
 
-If verification fails, the returned stream will error with an `EBADCHECKSUM`
-error code.
+If `opts.algorithms` is passed in, the listed algorithms will be calculated when
+generating the final `Integrity` instance. The default is `['sha512']`.
+
+If `opts.single` is passed in, a single `IntegrityMetadata` instance will be
+returned.
+
+If `opts.integrity` is passed in, it should be an `integrity` value understood
+by [`parse`](#parse) that the stream will check the data against. If
+verification succeeds, the integrity stream will emit a `verified` event whose
+value is a single `IntegrityMetadata` object that is the one that succeeded
+verification. If verification fails, the stream will error with an
+`EBADCHECKSUM` error code.
 
 If `opts.size` is given, it will be matched against the stream size. An error
 with `err.code` `EBADSIZE` will be emitted by the stream if the expected size
