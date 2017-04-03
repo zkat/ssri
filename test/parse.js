@@ -26,7 +26,7 @@ test('parses single-entry integrity string', t => {
   t.done()
 })
 
-test('can parse single-entry string directly into IntegrityMetadata', t => {
+test('can parse single-entry string directly into Hash', t => {
   const sha = hash(TEST_DATA, 'sha512')
   const integrity = `sha512-${sha}`
   t.deepEqual(ssri.parse(integrity, {single: true}), {
@@ -34,11 +34,11 @@ test('can parse single-entry string directly into IntegrityMetadata', t => {
     digest: sha,
     algorithm: 'sha512',
     options: []
-  }, 'single entry parsed into single IntegrityMetadata instance')
+  }, 'single entry parsed into single Hash instance')
   t.done()
 })
 
-test('accepts IntegrityMetadata-likes as input', t => {
+test('accepts Hash-likes as input', t => {
   const algorithm = 'sha512'
   const digest = hash(TEST_DATA, 'sha512')
   const sriLike = {

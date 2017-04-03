@@ -39,7 +39,7 @@ test('checkData', t => {
       digest: hash(TEST_DATA, 'sha512')
     }),
     meta,
-    'Accepts IntegrityMetadata-like SRI'
+    'Accepts Hash-like SRI'
   )
   t.deepEqual(
     ssri.checkData(TEST_DATA.toString('utf8'), sri),
@@ -110,7 +110,7 @@ test('checkStream', t => {
       digest: hash(TEST_DATA, 'sha512')
     })
   }).then(res => {
-    t.deepEqual(res, meta, 'Accepts IntegrityMetadata-like SRI')
+    t.deepEqual(res, meta, 'Accepts Hash-like SRI')
     return ssri.checkStream(
       fileStream(),
       `sha512-nope sha512-${hash(TEST_DATA, 'sha512')}`

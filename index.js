@@ -10,12 +10,12 @@ const SRI_REGEX = /^([^-]+)-([^?]+)([?\S*]*)$/
 const STRICT_SRI_REGEX = /^([^-]+)-([A-Za-z0-9+/]+(?:=?=?))([?\x21-\x7E]*)$/
 const VCHAR_REGEX = /^[\x21-\x7E]+$/
 
-class IntegrityMetadata {
-  get isIntegrityMetadata () { return true }
-  constructor (metadata, opts) {
+class Hash {
+  get isHash () { return true }
+  constructor (hash, opts) {
     const strict = !!(opts && opts.strict)
-    this.source = metadata.trim()
-    // 3.1. Integrity metadata
+    this.source = hash.trim()
+    // 3.1. Integrity metadata (called "Hash" by ssri)
     // https://w3c.github.io/webappsec-subresource-integrity/#integrity-metadata-description
     const match = this.source.match(
       strict
@@ -71,8 +71,8 @@ class Integrity {
       sep = sep.replace(/\S+/g, ' ')
     }
     return Object.keys(this).map(k => {
-      return this[k].map(meta => {
-        return IntegrityMetadata.prototype.toString.call(meta, opts)
+      return this[k].map(hash => {
+        return Hash.prototype.toString.call(hash, opts)
       }).filter(x => x.length).join(sep)
     }).filter(x => x.length).join(sep)
   }
@@ -111,14 +111,14 @@ function _parse (integrity, opts) {
   // 3.4.3. Parse metadata
   // https://w3c.github.io/webappsec-subresource-integrity/#parse-metadata
   if (opts.single) {
-    return new IntegrityMetadata(integrity, opts)
+    return new Hash(integrity, opts)
   }
   return integrity.trim().split(/\s+/).reduce((acc, string) => {
-    const metadata = new IntegrityMetadata(string, opts)
-    if (metadata.algorithm && metadata.digest) {
-      const algo = metadata.algorithm
+    const hash = new Hash(string, opts)
+    if (hash.algorithm && hash.digest) {
+      const algo = hash.algorithm
       if (!acc[algo]) { acc[algo] = [] }
-      acc[algo].push(metadata)
+      acc[algo].push(hash)
     }
     return acc
   }, new Integrity())
@@ -127,7 +127,7 @@ function _parse (integrity, opts) {
 module.exports.stringify = stringify
 function stringify (obj, opts) {
   if (obj.algorithm && obj.digest) {
-    return IntegrityMetadata.prototype.toString.call(obj, opts)
+    return Hash.prototype.toString.call(obj, opts)
   } else if (typeof obj === 'string') {
     return stringify(parse(obj, opts), opts)
   } else {
@@ -156,14 +156,14 @@ function fromData (data, opts) {
   : ''
   return algorithms.reduce((acc, algo) => {
     const digest = crypto.createHash(algo).update(data).digest('base64')
-    const meta = new IntegrityMetadata(
+    const hash = new Hash(
       `${algo}-${digest}${optString}`,
        opts
     )
-    if (meta.algorithm && meta.digest) {
-      const algo = meta.algorithm
+    if (hash.algorithm && hash.digest) {
+      const algo = hash.algorithm
       if (!acc[algo]) { acc[algo] = [] }
-      acc[algo].push(meta)
+      acc[algo].push(hash)
     }
     return acc
   }, new Integrity())
@@ -192,7 +192,7 @@ function checkData (data, sri, opts) {
   const algorithm = sri.pickAlgorithm(opts)
   const digests = sri[algorithm]
   const digest = crypto.createHash(algorithm).update(data).digest('base64')
-  return digests.find(meta => meta.digest === digest) || false
+  return digests.find(hash => hash.digest === digest) || false
 }
 
 module.exports.checkStream = checkStream
@@ -243,9 +243,9 @@ function integrityStream (opts) {
       const match = (
         // Integrity verification mode
         opts.integrity &&
-        digests.find(meta => {
-          return newSri[algorithm].find(newmeta => {
-            return meta.digest === newmeta.digest
+        digests.find(hash => {
+          return newSri[algorithm].find(newhash => {
+            return hash.digest === newhash.digest
           })
         })
       )

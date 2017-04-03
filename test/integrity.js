@@ -34,7 +34,7 @@ test('concat()', t => {
   t.equal(
     sri.concat({digest: 'bar', algorithm: 'sha384'}).toString(),
     'sha512-foo sha384-bar',
-    'concatenates with an IntegrityMetadata-like'
+    'concatenates with an Hash-like'
   )
   t.equal(
     sri.concat({
@@ -97,12 +97,12 @@ test('hexDigest()', t => {
   t.done()
 })
 
-test('isIntegrity and isIntegrityMetadata', t => {
+test('isIntegrity and isHash', t => {
   const sri = ssri.parse('sha512-bar')
   t.ok(sri.isIntegrity, 'full sri has !!.isIntegrity')
   t.ok(
-    sri['sha512'][0].isIntegrityMetadata,
-    'sri hash has !!.isIntegrityMetadata'
+    sri['sha512'][0].isHash,
+    'sri hash has !!.isHash'
   )
   t.done()
 })

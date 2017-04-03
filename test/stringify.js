@@ -35,7 +35,7 @@ test('serializes Integrity-likes', t => {
   t.done()
 })
 
-test('serializes IntegrityMetadata-likes', t => {
+test('serializes Hash-likes', t => {
   const sriLike = {
     digest: 'foo',
     algorithm: 'sha512'
