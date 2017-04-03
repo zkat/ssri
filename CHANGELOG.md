@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/zkat/ssri/compare/v3.0.2...v4.0.0) (2017-04-03)
+
+
+### Bug Fixes
+
+* **integrity:** should have changed the error code before. oops ([8381afa](https://github.com/zkat/ssri/commit/8381afa))
+
+
+### BREAKING CHANGES
+
+* **integrity:** EBADCHECKSUM -> EINTEGRITY for verification errors
+
+
+
 <a name="3.0.2"></a>
 ## [3.0.2](https://github.com/zkat/ssri/compare/v3.0.1...v3.0.2) (2017-04-03)
 
