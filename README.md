@@ -29,7 +29,7 @@ Integrity](https://w3c.github.io/webappsec/specs/subresourceintegrity/) hashes.
   * Integrity Verification
     * [`checkData`](#check-data)
     * [`checkStream`](#check-stream)
-    * [`createCheckerStream`](#create-checker-stream)
+    * [`integrityStream`](#integrity-stream)
 
 ### Example
 
