@@ -24,6 +24,9 @@
     "checksum",
     "hashing",
     "subresource integrity",
+    "sri",
+    "sri string",
+    "sri generator",
     "html"
   ],
   "author": {
