@@ -24,6 +24,21 @@ test('toString()', t => {
   t.done()
 })
 
+test('toJSON()', t => {
+  const sri = ssri.parse('sha512-foo sha256-bar!')
+  t.equal(
+    sri.toJSON(),
+    'sha512-foo sha256-bar!',
+    'integrity objects from ssri.parse() can use toJSON()'
+  )
+  t.equal(
+    sri.sha512[0].toJSON(),
+    'sha512-foo',
+    'hash objects should toJSON also'
+  )
+  t.done()
+})
+
 test('concat()', t => {
   const sri = ssri.parse('sha512-foo')
   t.equal(

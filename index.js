@@ -33,6 +33,9 @@ class Hash {
   hexDigest () {
     return this.digest && bufFrom(this.digest, 'base64').toString('hex')
   }
+  toJSON () {
+    return this.toString()
+  }
   toString (opts) {
     if (opts && opts.strict) {
       // Strict mode enforces the standard as close to the foot of the
@@ -63,6 +66,9 @@ class Hash {
 
 class Integrity {
   get isIntegrity () { return true }
+  toJSON () {
+    return this.toString()
+  }
   toString (opts) {
     opts = opts || {}
     let sep = opts.sep || ' '
@@ -273,6 +279,43 @@ function integrityStream (opts) {
     }
   })
   return stream
+}
+
+module.exports.create = createIntegrity
+function createIntegrity (opts) {
+  opts = opts || {}
+
+  opts = opts || {}
+  const algorithms = opts.algorithms || ['sha512']
+  const optString = opts.options && opts.options.length
+  ? `?${opts.options.join('?')}`
+  : ''
+
+  const hashes = algorithms.map(crypto.createHash)
+
+  return {
+    update: function (chunk, enc) {
+      hashes.forEach(h => h.update(chunk, enc))
+      return this
+    },
+    digest: function (enc) {
+      const integrity = algorithms.reduce((acc, algo) => {
+        const digest = hashes.shift().digest('base64')
+        const hash = new Hash(
+          `${algo}-${digest}${optString}`,
+           opts
+        )
+        if (hash.algorithm && hash.digest) {
+          const algo = hash.algorithm
+          if (!acc[algo]) { acc[algo] = [] }
+          acc[algo].push(hash)
+        }
+        return acc
+      }, new Integrity())
+
+      return integrity
+    }
+  }
 }
 
 // This is a Best Effort™ at a reasonable priority for hash algos
