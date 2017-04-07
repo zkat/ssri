@@ -20,12 +20,14 @@ Integrity](https://w3c.github.io/webappsec/specs/subresourceintegrity/) hashes.
     * [`stringify`](#stringify)
     * [`Integrity#concat`](#integrity-concat)
     * [`Integrity#toString`](#integrity-to-string)
+    * [`Integrity#toJSON`](#integrity-to-json)
     * [`Integrity#pickAlgorithm`](#integrity-pick-algorithm)
     * [`Integrity#hexDigest`](#integrity-hex-digest)
   * Integrity Generation
     * [`fromHex`](#from-hex)
     * [`fromData`](#from-data)
     * [`fromStream`](#from-stream)
+    * [`create`](#create)
   * Integrity Verification
     * [`checkData`](#check-data)
     * [`checkStream`](#check-stream)
@@ -200,6 +202,22 @@ const integrity = 'sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xp
 ssri.parse(integrity).toString() === integrity
 ```
 
+#### <a name="integrity-to-json"></a> `> Integrity#toJSON() -> String`
+
+Returns the string representation of an `Integrity` object. All hash entries
+will be concatenated in the string by `' '`.
+
+This is a convenience method so you can pass an `Integrity` object directly to `JSON.stringify`.
+For more info check out [toJSON() behavior on mdn](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#toJSON%28%29_behavior).
+
+##### Example
+
+```javascript
+const integrity = '"sha512-9KhgCRIx/AmzC8xqYJTZRrnO8OW2Pxyl2DIMZSBOr0oDvtEFyht3xpp71j/r/pAe1DM+JI/A+line3jUBgzQ7A==?foo"'
+
+JSON.stringify(ssri.parse(integrity)) === integrity
+```
+
 #### <a name="integrity-pick-algorithm"></a> `> Integrity#pickAlgorithm([opts]) -> String`
 
 Returns the "best" algorithm from those available in the integrity object.
@@ -310,6 +328,30 @@ ssri.fromStream(fs.createReadStream('index.js'), {
 }).then(integrity => {
   return ssri.checkStream(fs.createReadStream('index.js'), integrity)
 }) // succeeds
+```
+
+#### <a name="create"></a> `> ssri.create([opts]) -> <Hash>`
+
+Returns a Hash object with `update(<Buffer or string>[,enc])` and `digest()` methods.
+
+
+The Hash object provides the same methods as [crypto class Hash](https://nodejs.org/dist/latest-v6.x/docs/api/crypto.html#crypto_class_hash).
+`digest()` accepts no arguments and returns an Integrity object calculated by reading data from
+calls to update.
+
+It accepts both `opts.algorithms` and `opts.options`, which are documented as
+part of [`ssri.fromData`](#from-data).
+
+If `opts.strict` is true, the integrity object will be created using strict
+parsing rules. See [`ssri.parse`](#parse).
+
+##### Example
+
+```javascript
+const integrity = ssri.create().update('foobarbaz').digest()
+integrity.toString()
+// ->
+// sha512-yzd8ELD1piyANiWnmdnpCL5F52f10UfUdEkHywVZeqTt0ymgrxR63Qz0GB7TKPoeeZQmWCaz7T1+9vBnypkYWg==
 ```
 
 #### <a name="check-data"></a> `> ssri.checkData(data, sri, [opts]) -> Hash|false`
