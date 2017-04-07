@@ -207,8 +207,8 @@ ssri.parse(integrity).toString() === integrity
 Returns the string representation of an `Integrity` object. All hash entries
 will be concatenated in the string by `' '`.
 
-this is a convenience method so you can pass an `Integrity` object directly to `JSON.stringify`
-this works with the built in native JSON feature. For more info check out [toJSON() behavior on mdn](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#toJSON%28%29_behavior)
+This is a convenience method so you can pass an `Integrity` object directly to `JSON.stringify`.
+For more info check out [toJSON() behavior on mdn](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#toJSON%28%29_behavior).
 
 ##### Example
 
@@ -330,10 +330,14 @@ ssri.fromStream(fs.createReadStream('index.js'), {
 }) // succeeds
 ```
 
-#### <a name="create"></a> `> ssri.create([opts]) -> <Integrity>`
+#### <a name="create"></a> `> ssri.create([opts]) -> <Hash>`
 
-Returns an Integrity object calculated by reading data from
-calls to update
+Returns a Hash object with `update(<Buffer or string>[,enc])` and `digest()` methods.
+
+
+The Hash object provides the same methods as [crypto class Hash](https://nodejs.org/dist/latest-v6.x/docs/api/crypto.html#crypto_class_hash).
+`digest()` accepts no arguments and returns an Integrity object calculated by reading data from
+calls to update.
 
 It accepts both `opts.algorithms` and `opts.options`, which are documented as
 part of [`ssri.fromData`](#from-data).

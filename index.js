@@ -284,8 +284,6 @@ function integrityStream (opts) {
 module.exports.create = createIntegrity
 function createIntegrity (opts) {
   opts = opts || {}
-
-  opts = opts || {}
   const algorithms = opts.algorithms || ['sha512']
   const optString = opts.options && opts.options.length
   ? `?${opts.options.join('?')}`
