@@ -93,7 +93,11 @@ class Integrity {
   }
   pickAlgorithm (opts) {
     const pickAlgorithm = (opts && opts.pickAlgorithm) || getPrioritizedHash
-    return Object.keys(this).reduce((acc, algo) => {
+    const keys = Object.keys(this)
+    if (!keys.length) {
+      throw new Error(`No algorithms available for ${this}`)
+    }
+    return keys.reduce((acc, algo) => {
       return pickAlgorithm(acc, algo) || acc
     })
   }
