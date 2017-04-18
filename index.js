@@ -242,44 +242,42 @@ function integrityStream (opts) {
       streamSize += chunk.length
       hashes.forEach(h => h.update(chunk, enc))
       cb(null, chunk, enc)
-    },
-    flush (done) {
-      const optString = (opts.options && opts.options.length)
-      ? `?${opts.options.join('?')}`
-      : ''
-      const newSri = parse(hashes.map((h, i) => {
-        return `${algorithms[i]}-${h.digest('base64')}${optString}`
-      }).join(' '), opts)
-      const match = (
-        // Integrity verification mode
-        opts.integrity &&
-        digests.find(hash => {
-          return newSri[algorithm].find(newhash => {
-            return hash.digest === newhash.digest
-          })
+    }
+  }).on('end', () => {
+    const optString = (opts.options && opts.options.length)
+    ? `?${opts.options.join('?')}`
+    : ''
+    const newSri = parse(hashes.map((h, i) => {
+      return `${algorithms[i]}-${h.digest('base64')}${optString}`
+    }).join(' '), opts)
+    const match = (
+      // Integrity verification mode
+      opts.integrity &&
+      digests.find(hash => {
+        return newSri[algorithm].find(newhash => {
+          return hash.digest === newhash.digest
         })
-      )
-      if (typeof opts.size === 'number' && streamSize !== opts.size) {
-        const err = new Error(`stream size mismatch when checking ${sri}.\n  Wanted: ${opts.size}\n  Found: ${streamSize}`)
-        err.code = 'EBADSIZE'
-        err.found = streamSize
-        err.expected = opts.size
-        err.sri = sri
-        stream.emit('error', err)
-      } else if (opts.integrity && !match) {
-        const err = new Error(`${sri} integrity checksum failed when using ${algorithm}`)
-        err.code = 'EINTEGRITY'
-        err.found = newSri
-        err.expected = digests
-        err.algorithm = algorithm
-        err.sri = sri
-        stream.emit('error', err)
-      } else {
-        stream.emit('size', streamSize)
-        stream.emit('integrity', newSri)
-        match && stream.emit('verified', match)
-      }
-      done()
+      })
+    )
+    if (typeof opts.size === 'number' && streamSize !== opts.size) {
+      const err = new Error(`stream size mismatch when checking ${sri}.\n  Wanted: ${opts.size}\n  Found: ${streamSize}`)
+      err.code = 'EBADSIZE'
+      err.found = streamSize
+      err.expected = opts.size
+      err.sri = sri
+      stream.emit('error', err)
+    } else if (opts.integrity && !match) {
+      const err = new Error(`${sri} integrity checksum failed when using ${algorithm}: wanted ${digests} but got ${newSri}. (${streamSize} bytes)`)
+      err.code = 'EINTEGRITY'
+      err.found = newSri
+      err.expected = digests
+      err.algorithm = algorithm
+      err.sri = sri
+      stream.emit('error', err)
+    } else {
+      stream.emit('size', streamSize)
+      stream.emit('integrity', newSri)
+      match && stream.emit('verified', match)
     }
   })
   return stream
@@ -305,7 +303,7 @@ function createIntegrity (opts) {
         const digest = hashes.shift().digest('base64')
         const hash = new Hash(
           `${algo}-${digest}${optString}`,
-           opts
+          opts
         )
         if (hash.algorithm && hash.digest) {
           const algo = hash.algorithm
