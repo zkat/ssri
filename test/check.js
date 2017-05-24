@@ -59,6 +59,21 @@ test('checkData', t => {
     false,
     'returns false when verification fails'
   )
+  t.equal(
+    ssri.checkData('nope', 'sha512-nope'),
+    false,
+    'returns false on invalid sri hash'
+  )
+  t.equal(
+    ssri.checkData('nope', 'garbage'),
+    false,
+    'returns false on garbage sri input'
+  )
+  t.equal(
+    ssri.checkData('nope', ''),
+    false,
+    'returns false on empty sri input'
+  )
   t.deepEqual(
     ssri.checkData(TEST_DATA, [
       'sha512-nope',
@@ -128,6 +143,24 @@ test('checkStream', t => {
       throw new Error('unexpected success')
     }, err => {
       t.equal(err.code, 'EINTEGRITY', 'checksum failure rejects the promise')
+    })
+  }).then(() => {
+    return ssri.checkStream(
+      fs.createReadStream(path.join(__dirname, '..', 'package.json')),
+      'garbage'
+    ).then(() => {
+      throw new Error('unexpected success')
+    }, err => {
+      t.equal(err.code, 'EINTEGRITY', 'checksum failure if sri is garbage')
+    })
+  }).then(() => {
+    return ssri.checkStream(
+      fs.createReadStream(path.join(__dirname, '..', 'package.json')),
+      'sha512-nope'
+    ).then(() => {
+      throw new Error('unexpected success')
+    }, err => {
+      t.equal(err.code, 'EINTEGRITY', 'checksum failure if sri has bad hash')
     })
   }).then(() => {
     return ssri.checkStream(fileStream(), [
