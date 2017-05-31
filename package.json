@@ -36,7 +36,9 @@
     "twitter": "maybekatz"
   },
   "license": "CC0-1.0",
-  "dependencies": {},
+  "dependencies": {
+    "safe-buffer": "^5.0.1"
+  },
   "devDependencies": {
     "nyc": "^10.3.2",
     "standard": "^9.0.2",
