@@ -37,13 +37,13 @@
   },
   "license": "CC0-1.0",
   "dependencies": {
-    "safe-buffer": "^5.0.1"
+    "safe-buffer": "^5.1.0"
   },
   "devDependencies": {
     "nyc": "^10.3.2",
     "standard": "^9.0.2",
-    "standard-version": "^4.0.0",
-    "tap": "^10.3.2",
+    "standard-version": "^4.1.0",
+    "tap": "^10.3.3",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.8"
   },
