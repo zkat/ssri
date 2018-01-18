@@ -326,7 +326,12 @@ function createIntegrity (opts) {
 
 // This is a Best Effort™ at a reasonable priority for hash algos
 const DEFAULT_PRIORITY = [
-  'md5', 'whirlpool', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
+  'md5', 'whirlpool', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512',
+  // TODO - it's unclear _which_ of these Node will actually use as its name
+  //        for the algorithm, so we guesswork it based on the OpenSSL names.
+  'sha3',
+  'sha3-256', 'sha3-384', 'sha3-512',
+  'sha3_256', 'sha3_384', 'sha3_512'
 ]
 function getPrioritizedHash (algo1, algo2) {
   return DEFAULT_PRIORITY.indexOf(algo1.toLowerCase()) >= DEFAULT_PRIORITY.indexOf(algo2.toLowerCase())
