@@ -193,6 +193,36 @@ test('checkStream', t => {
       })['sha384'][0],
       'picks the "strongest" available algorithm, by default'
     )
+    return ssri.checkStream(fileStream(), [
+      `sha1-${hash(TEST_DATA, 'sha1')}`,
+      `sha384-${hash(TEST_DATA, 'sha384')}`,
+      `sha256-${hash(TEST_DATA, 'sha256')}`
+    ].join(' '), {
+      algorithms: ['sha256']
+    })
+  }).then(res => {
+    t.deepEqual(
+      res,
+      ssri.parse({
+        algorithm: 'sha384', digest: hash(TEST_DATA, 'sha384')
+      })['sha384'][0],
+      'opts.algorithm still takes into account algo to check against'
+    )
+    return ssri.checkStream(fileStream(), [
+      `sha1-${hash(TEST_DATA, 'sha1')}`,
+      `sha384-${hash(TEST_DATA, 'sha384')}`,
+      `sha256-${hash(TEST_DATA, 'sha256')}`
+    ].join(' '), {
+      algorithms: ['sha512']
+    })
+  }).then(res => {
+    t.deepEqual(
+      res,
+      ssri.parse({
+        algorithm: 'sha384', digest: hash(TEST_DATA, 'sha384')
+      })['sha384'][0],
+      '...even if opts.algorithms includes a hash that is not present'
+    )
     return ssri.checkStream(
       fileStream(), `sha256-${hash(TEST_DATA, 'sha256')}`, {
         size: TEST_DATA.length - 1
