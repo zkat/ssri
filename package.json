@@ -1,6 +1,6 @@
 {
   "name": "ssri",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Standard Subresource Integrity library --  parses, serializes, generates, and verifies integrity metadata according to the SRI spec.",
   "main": "index.js",
   "files": [
