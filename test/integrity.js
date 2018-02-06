@@ -1,5 +1,7 @@
 'use strict'
 
+const Buffer = require('safe-buffer').Buffer
+
 const test = require('tap').test
 
 const ssri = require('..')
@@ -129,15 +131,11 @@ test('pickAlgorithm()', t => {
 test('hexDigest()', t => {
   t.equal(
     ssri.parse('sha512-foo').hexDigest(),
-    (
-      Buffer.from ? Buffer.from('foo', 'base64') : new Buffer('foo', 'base64')
-    ).toString('hex'),
+    Buffer.from('foo', 'base64').toString('hex'),
     'returned hex version of base64 digest')
   t.equal(
     ssri.parse('sha512-bar', {single: true}).hexDigest(),
-    (
-      Buffer.from ? Buffer.from('bar', 'base64') : new Buffer('bar', 'base64')
-    ).toString('hex'),
+    Buffer.from('bar', 'base64').toString('hex'),
     'returned hex version of base64 digest')
   t.done()
 })
