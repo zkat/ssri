@@ -78,6 +78,33 @@ test('concat()', t => {
   t.done()
 })
 
+test('match()', t => {
+  const sri = ssri.parse('sha1-foo sha512-bar')
+  t.similar(sri.match('sha1-foo'), {
+    algorithm: 'sha1',
+    digest: 'foo'
+  }, 'returns the matching hash')
+  t.similar(sri.match(ssri.parse('sha1-foo')), {
+    algorithm: 'sha1',
+    digest: 'foo'
+  }, 'accepts other Integrity objects')
+  t.similar(sri.match(ssri.parse('sha1-foo')), {
+    algorithm: 'sha1',
+    digest: 'foo'
+  }, 'accepts other Hash objects')
+  t.similar(sri.match({digest: 'foo', algorithm: 'sha1'}), {
+    algorithm: 'sha1',
+    digest: 'foo'
+  }, 'accepts Hash-like objects')
+  t.similar(sri.match('sha1-bar sha512-bar'), {
+    algorithm: 'sha512',
+    digest: 'bar'
+  }, 'returns the strongest match')
+  t.notOk(sri.match('sha512-foo'), 'falsy when match fails')
+  t.notOk(sri.match('sha384-foo'), 'falsy when match fails')
+  t.done()
+})
+
 test('pickAlgorithm()', t => {
   const sri = ssri.parse('sha1-foo sha512-bar sha384-baz')
   t.equal(sri.pickAlgorithm(), 'sha512', 'picked best algorithm')
