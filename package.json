@@ -40,10 +40,10 @@
     "safe-buffer": "^5.1.1"
   },
   "devDependencies": {
-    "nyc": "^10.3.2",
-    "standard": "^9.0.2",
-    "standard-version": "^4.1.0",
-    "tap": "^10.3.3",
+    "nyc": "^11.4.1",
+    "standard": "^10.0.3",
+    "standard-version": "^4.3.0",
+    "tap": "^11.1.0",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.8"
   },
