@@ -108,8 +108,8 @@ test('support strict serialization', t => {
     'entries that do not conform to strict spec interpretation removed'
   )
   t.equal(
-    ssri.stringify('sha512-foo sha256-bar', {sep: ' \r|\n\t', strict: true}),
-    'sha512-foo \r \n\tsha256-bar',
+    ssri.stringify('sha512-WrLorGiX4iEWOOOaJSiCrmDIamA47exH+Bz7tVwIPb4sCU8w4iNqGCqYuspMMeU5pgz/sU7koP5u8W3RCUojGw== sha256-Qhx213Vjr6GRSEawEL0WTzlb00whAuXpngy5zxc8HYc=', {sep: ' \r|\n\t', strict: true}),
+    'sha512-WrLorGiX4iEWOOOaJSiCrmDIamA47exH+Bz7tVwIPb4sCU8w4iNqGCqYuspMMeU5pgz/sU7koP5u8W3RCUojGw== \r \n\tsha256-Qhx213Vjr6GRSEawEL0WTzlb00whAuXpngy5zxc8HYc=',
     'strict mode replaces non-whitespace characters in separator with space'
   )
   t.done()
