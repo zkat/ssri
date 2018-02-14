@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.2.2"></a>
+## [5.2.2](https://github.com/zkat/ssri/compare/v5.2.1...v5.2.2) (2018-02-14)
+
+
+### Bug Fixes
+
+* **security:** tweak strict SRI regex ([#10](https://github.com/zkat/ssri/issues/10)) ([d0ebcdc](https://github.com/zkat/ssri/commit/d0ebcdc))
+
+
+
 <a name="5.2.1"></a>
 ## [5.2.1](https://github.com/zkat/ssri/compare/v5.2.0...v5.2.1) (2018-02-06)
 
