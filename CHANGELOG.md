@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.2.4"></a>
+## [5.2.4](https://github.com/zkat/ssri/compare/v5.2.3...v5.2.4) (2018-02-16)
+
+
+
 <a name="5.2.3"></a>
 ## [5.2.3](https://github.com/zkat/ssri/compare/v5.2.2...v5.2.3) (2018-02-16)
 
