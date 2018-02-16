@@ -249,8 +249,12 @@ function integrityStream (opts) {
   const algorithm = goodSri && sri.pickAlgorithm(opts)
   const digests = goodSri && sri[algorithm]
   // Calculating stream
-  const algorithms = (opts.algorithms || ['sha512'])
-  .concat(algorithm ? [algorithm] : [])
+  const algorithms = Array.from(
+    new Set(
+      (opts.algorithms || ['sha512'])
+      .concat(algorithm ? [algorithm] : [])
+    )
+  )
   const hashes = algorithms.map(crypto.createHash)
   let streamSize = 0
   const stream = new Transform({
