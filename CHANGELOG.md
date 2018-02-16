@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.2.3"></a>
+## [5.2.3](https://github.com/zkat/ssri/compare/v5.2.2...v5.2.3) (2018-02-16)
+
+
+### Bug Fixes
+
+* **hashes:** filter hash priority list by available hashes ([2fa30b8](https://github.com/zkat/ssri/commit/2fa30b8))
+* **integrityStream:** dedupe algorithms to generate ([d56c654](https://github.com/zkat/ssri/commit/d56c654))
+
+
+
 <a name="5.2.2"></a>
 ## [5.2.2](https://github.com/zkat/ssri/compare/v5.2.1...v5.2.2) (2018-02-14)
 
