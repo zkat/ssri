@@ -331,6 +331,8 @@ function createIntegrity (opts) {
   }
 }
 
+const NODE_HASHES = new Set(crypto.getHashes())
+
 // This is a Best Effort™ at a reasonable priority for hash algos
 const DEFAULT_PRIORITY = [
   'md5', 'whirlpool', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512',
@@ -339,7 +341,8 @@ const DEFAULT_PRIORITY = [
   'sha3',
   'sha3-256', 'sha3-384', 'sha3-512',
   'sha3_256', 'sha3_384', 'sha3_512'
-]
+].filter(algo => NODE_HASHES.has(algo))
+
 function getPrioritizedHash (algo1, algo2) {
   return DEFAULT_PRIORITY.indexOf(algo1.toLowerCase()) >= DEFAULT_PRIORITY.indexOf(algo2.toLowerCase())
   ? algo1
