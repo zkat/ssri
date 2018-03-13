@@ -28,6 +28,9 @@ test('checkData', t => {
     meta,
     'Buffer data successfully verified'
   )
+  t.doesNotThrow(() => {
+    ssri.checkData(TEST_DATA, sri, {error: true})
+  }, 'error not thrown when error: true and data verifies')
   t.deepEqual(
     ssri.checkData(TEST_DATA, `sha512-${hash(TEST_DATA, 'sha512')}`),
     meta,
@@ -59,6 +62,12 @@ test('checkData', t => {
     false,
     'returns false when verification fails'
   )
+  t.throws(() => {
+    ssri.checkData('nope', sri, {error: true})
+  }, /Integrity checksum failed/, 'integrity error thrown when error: true with bad data')
+  t.throws(() => {
+    ssri.checkData('nope', sri, {error: true, size: 3})
+  }, /data size mismatch/, 'size error thrown when error: true with bad size')
   t.equal(
     ssri.checkData('nope', 'sha512-nope'),
     false,
@@ -74,6 +83,9 @@ test('checkData', t => {
     false,
     'returns false on empty sri input'
   )
+  t.throws(() => {
+    ssri.checkData('nope', '', {error: true})
+  }, /No valid integrity hashes/, 'errors on empty sri input if error: true')
   t.deepEqual(
     ssri.checkData(TEST_DATA, [
       'sha512-nope',
