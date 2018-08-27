@@ -36,7 +36,9 @@
     "twitter": "maybekatz"
   },
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "figgy-pudding": "^3.5.1"
+  },
   "devDependencies": {
     "nyc": "^11.4.1",
     "standard": "^10.0.3",
